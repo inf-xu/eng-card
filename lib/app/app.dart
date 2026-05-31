@@ -9,12 +9,25 @@ class EngCardApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final bootstrapAsync = ref.watch(appBootstrapProvider);
     final settingsAsync = ref.watch(settingsControllerProvider);
     final themeMode = settingsAsync.when(
-      data: (_) => ref.read(settingsControllerProvider.notifier).readThemeMode(),
+      data: (_) =>
+          ref.read(settingsControllerProvider.notifier).readThemeMode(),
       loading: () => ThemeMode.system,
       error: (_, _) => ThemeMode.system,
     );
+
+    if (bootstrapAsync.isLoading) {
+      return MaterialApp(
+        title: '英格卡',
+        theme: buildLightTheme(),
+        darkTheme: buildDarkTheme(),
+        themeMode: themeMode,
+        debugShowCheckedModeBanner: false,
+        home: const Scaffold(body: Center(child: CircularProgressIndicator())),
+      );
+    }
 
     return MaterialApp(
       title: '英格卡',

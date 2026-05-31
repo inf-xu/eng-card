@@ -1,3 +1,4 @@
+import 'package:eng_card/data/repositories/bootstrap_repository.dart';
 import 'package:eng_card/core/enums.dart';
 import 'package:eng_card/data/local/app_database.dart';
 import 'package:eng_card/data/repositories/card_repository.dart';
@@ -34,8 +35,25 @@ final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
   return SettingsRepository();
 });
 
+final bootstrapRepositoryProvider = Provider<BootstrapRepository>((ref) {
+  return BootstrapRepository(ref.watch(appDatabaseProvider));
+});
+
+final appBootstrapProvider = FutureProvider<void>((ref) async {
+  final settingsController = ref.read(settingsControllerProvider.notifier);
+  final settings = await ref.read(settingsControllerProvider.future);
+  final deckId = await ref
+      .read(bootstrapRepositoryProvider)
+      .seedIpaDeckFromAsset();
+  if (settings.currentDeckId == null && deckId != null) {
+    await settingsController.updateCurrentDeckId(deckId);
+  }
+});
+
 final settingsControllerProvider =
-    AsyncNotifierProvider<SettingsController, AppSettings>(SettingsController.new);
+    AsyncNotifierProvider<SettingsController, AppSettings>(
+      SettingsController.new,
+    );
 
 class SettingsController extends AsyncNotifier<AppSettings> {
   @override
@@ -78,7 +96,10 @@ class SettingsController extends AsyncNotifier<AppSettings> {
     if (current == null) {
       return;
     }
-    final next = current.copyWith(currentDeckId: deckId, clearCurrentDeckId: deckId == null);
+    final next = current.copyWith(
+      currentDeckId: deckId,
+      clearCurrentDeckId: deckId == null,
+    );
     state = AsyncValue.data(next);
     await ref.watch(settingsRepositoryProvider).save(next);
   }
@@ -119,7 +140,10 @@ final decksProvider = StreamProvider<List<DeckWithCount>>((ref) {
   return ref.watch(deckRepositoryProvider).watchDecks();
 });
 
-final cardsByDeckProvider = StreamProvider.family<List<CardItem>, int>((ref, deckId) {
+final cardsByDeckProvider = StreamProvider.family<List<CardItem>, int>((
+  ref,
+  deckId,
+) {
   return ref.watch(cardRepositoryProvider).watchCardsByDeck(deckId);
 });
 
