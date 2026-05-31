@@ -39,7 +39,7 @@ class StatsPage extends ConsumerWidget {
             loading: () => const Center(child: CircularProgressIndicator()),
           ),
           const SizedBox(height: 16),
-          Card(
+          _StatsCard(
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: trendAsync.when(
@@ -82,7 +82,7 @@ class StatsPage extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Card(
+          _StatsCard(
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: heatAsync.when(
@@ -124,7 +124,7 @@ class StatsPage extends ConsumerWidget {
           const SizedBox(height: 16),
           rankingAsync.when(
             data: (items) {
-              return Card(
+              return _StatsCard(
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Column(
@@ -151,7 +151,7 @@ class StatsPage extends ConsumerWidget {
           const SizedBox(height: 16),
           difficultAsync.when(
             data: (items) {
-              return Card(
+              return _StatsCard(
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Column(
@@ -177,7 +177,7 @@ class StatsPage extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           streakAsync.when(
-            data: (streak) => Card(
+            data: (streak) => _StatsCard(
               child: ListTile(
                 leading: const Icon(Icons.bolt_outlined),
                 title: const Text('连续学习天数'),
@@ -210,7 +210,7 @@ class _MetricCard extends StatelessWidget {
     final width = (MediaQuery.of(context).size.width - 16 * 2 - 12) / 2;
     return SizedBox(
       width: width,
-      child: Card(
+      child: _StatsCard(
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
@@ -225,6 +225,28 @@ class _MetricCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _StatsCard extends StatelessWidget {
+  const _StatsCard({
+    required this.child,
+  });
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 0,
+      shadowColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide.none,
+      ),
+      child: child,
     );
   }
 }
