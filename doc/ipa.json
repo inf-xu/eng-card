@@ -1,0 +1,309 @@
+{
+    "deck": "ipa",
+    "cards": [
+        {
+            "title": "b /b/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "d /d/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "f /f/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "g /g/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "h /h/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "j /dʒ/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "k /k/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "l /l/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "m /m/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "n /n/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "ng /ŋ/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "p /p/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "r /r/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "s /s/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "sh /ʃ/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "t /t/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "ch /tʃ/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "l /l/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "th /θ/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "th /ð/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "v /v/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "w /w/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "y /j/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "z /z/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "s /ʒ/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "tr /tr/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "dr /dr/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "ts /ts/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "ds /dz/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "qu /kw/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "tw /tw/",
+            "answer": "辅音诀"
+        },
+        {
+            "title": "l /l/ 舌音",
+            "answer": "辅音诀 - 欧"
+        },
+        {
+            "title": "n /n/ 舌音",
+            "answer": "辅音诀 - 恩"
+        },
+        {
+            "title": "r /r/ 舌音",
+            "answer": "辅音诀 - 儿"
+        },
+        {
+            "title": "sp /sp/",
+            "answer": "辅音诀 - sb"
+        },
+        {
+            "title": "st /st/",
+            "answer": "辅音诀 - sd"
+        },
+        {
+            "title": "sk /sk/",
+            "answer": "辅音诀 - sg"
+        },
+        {
+            "title": "str /str/",
+            "answer": "辅音诀 - sdr"
+        },
+        {
+            "title": "squ /squ/",
+            "answer": "辅音诀 - sgu"
+        },
+        {
+            "title": "ee /iː/",
+            "answer": "衣 - 长"
+        },
+        {
+            "title": "i /ɪ/",
+            "answer": "衣 - 短"
+        },
+        {
+            "title": "oo /uː/",
+            "answer": "屋 - 长"
+        },
+        {
+            "title": "u /ʊ/",
+            "answer": "屋 - 短"
+        },
+        {
+            "title": "o /aː/",
+            "answer": "啊 - 长"
+        },
+        {
+            "title": "u /ʌ/",
+            "answer": "啊 - 短"
+        },
+        {
+            "title": "ir /ɜːr/",
+            "answer": "儿 - 长"
+        },
+        {
+            "title": "er /ər/",
+            "answer": "儿 - 短"
+        },
+        {
+            "title": "a /æ/",
+            "answer": "叫人 - 诶 - 大声"
+        },
+        {
+            "title": "e /e/",
+            "answer": "叫人 - 诶 - 小声"
+        },
+        {
+            "title": "a /ɔː/",
+            "answer": "想到解法 - 喔 - 长"
+        },
+        {
+            "title": "oy /ɔɪ/",
+            "answer": "想到解法 - 喔衣 - 短"
+        },
+        {
+            "title": "eer /ɪər/",
+            "answer": "衣儿"
+        },
+        {
+            "title": "air /eər/",
+            "answer": "诶儿"
+        },
+        {
+            "title": "a /eɪ/",
+            "answer": "字母音 - A - 四声"
+        },
+        {
+            "title": "i /aɪ/",
+            "answer": "字母音 - I - 四声"
+        },
+        {
+            "title": "o /əʊ/",
+            "answer": "字母音 - O - 四声 - 欧 - 鹅屋"
+        },
+        {
+            "title": "a /ɑː/",
+            "answer": "字母音 - 啊"
+        },
+        {
+            "title": "ou /aʊ/",
+            "answer": "字母音 - 傲 - 啊屋"
+        },
+        {
+            "title": "a /ə/",
+            "answer": "字母音 - 鹅"
+        },
+        {
+            "title": "ee / ea / e / y",
+            "answer": "衣 - 长 - /iː/"
+        },
+        {
+            "title": "i / a / u",
+            "answer": "衣 - 短 - /ɪ/"
+        },
+        {
+            "title": "oo / u",
+            "answer": "屋 - 长 - /uː/   \n   屋 - 短 - /ʊ/"
+        },
+        {
+            "title": "o / a",
+            "answer": "啊 - 长 - /aː/   \n   想到解法 - 喔 - 长 - /ɔː/"
+        },
+        {
+            "title": "u / o",
+            "answer": "啊 - 短 - /ʌ/"
+        },
+        {
+            "title": "ir / ur",
+            "answer": "儿 - 长 - /ɜːr/"
+        },
+        {
+            "title": "er / or",
+            "answer": "儿 - 短 - /ər/"
+        },
+        {
+            "title": "a",
+            "answer": "叫人 - 诶 - 大声 - /æ/   \n   字母音 - 啊 - /ɑː/"
+        },
+        {
+            "title": "e / ea",
+            "answer": "叫人 - 诶 - 小声 - /e/"
+        },
+        {
+            "title": "oy / oi",
+            "answer": "想到解法 - 喔 - 短 - /ɔɪ/"
+        },
+        {
+            "title": "eer / ear",
+            "answer": "衣儿 - /ɪər/"
+        },
+        {
+            "title": "air / are",
+            "answer": "诶儿 - /eər/"
+        },
+        {
+            "title": "a / ay / ai",
+            "answer": "字母音 - A - 四声 - /eɪ/"
+        },
+        {
+            "title": "i / y",
+            "answer": "字母音 - I - 四声 - /aɪ/"
+        },
+        {
+            "title": "o / ow / oa",
+            "answer": "字母音 - O - 四声 - /əʊ/"
+        },
+        {
+            "title": "ou / ow",
+            "answer": "字母音 - 傲 - /aʊ/"
+        },
+        {
+            "title": "a / o / e",
+            "answer": "字母音 - 鹅 - /ə/"
+        }
+    ]
+}
