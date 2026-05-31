@@ -1,5 +1,6 @@
 import 'package:eng_card/app/providers.dart';
 import 'package:eng_card/core/enums.dart';
+import 'package:eng_card/widgets/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,68 +11,118 @@ class SettingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settingsAsync = ref.watch(settingsControllerProvider);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('设置')),
-      body: settingsAsync.when(
+    return EngPage(
+      title: '设置',
+      subtitle: 'Preferences',
+      child: settingsAsync.when(
         data: (settings) {
           return ListView(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             children: [
-              const ListTile(title: Text('外观模式')),
-              RadioGroup<int>(
-                groupValue: settings.themeModeIndex,
-                onChanged: (value) {
-                  if (value == null) {
-                    return;
-                  }
-                  switch (value) {
-                    case 0:
-                      ref.read(settingsControllerProvider.notifier).updateThemeMode(ThemeMode.system);
-                    case 1:
-                      ref.read(settingsControllerProvider.notifier).updateThemeMode(ThemeMode.light);
-                    case 2:
-                      ref.read(settingsControllerProvider.notifier).updateThemeMode(ThemeMode.dark);
-                  }
-                },
-                child: const Column(
+              _SettingSection(
+                icon: Icons.contrast_outlined,
+                title: '外观模式',
+                child: SegmentedButton<int>(
+                  segments: const [
+                    ButtonSegment(
+                      value: 0,
+                      icon: Icon(Icons.brightness_auto_outlined),
+                      label: Text('系统'),
+                    ),
+                    ButtonSegment(
+                      value: 1,
+                      icon: Icon(Icons.light_mode_outlined),
+                      label: Text('日间'),
+                    ),
+                    ButtonSegment(
+                      value: 2,
+                      icon: Icon(Icons.dark_mode_outlined),
+                      label: Text('夜间'),
+                    ),
+                  ],
+                  selected: {settings.themeModeIndex},
+                  onSelectionChanged: (values) {
+                    switch (values.first) {
+                      case 0:
+                        ref
+                            .read(settingsControllerProvider.notifier)
+                            .updateThemeMode(ThemeMode.system);
+                      case 1:
+                        ref
+                            .read(settingsControllerProvider.notifier)
+                            .updateThemeMode(ThemeMode.light);
+                      case 2:
+                        ref
+                            .read(settingsControllerProvider.notifier)
+                            .updateThemeMode(ThemeMode.dark);
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+              _SettingSection(
+                icon: Icons.format_list_numbered_outlined,
+                title: '默认选择数量',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    RadioListTile<int>(value: 0, title: Text('跟随系统')),
-                    RadioListTile<int>(value: 1, title: Text('日间模式')),
-                    RadioListTile<int>(value: 2, title: Text('夜间模式')),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Slider(
+                            min: 1,
+                            max: 100,
+                            divisions: 99,
+                            label: '${settings.defaultSelectionCount}',
+                            value: settings.defaultSelectionCount.toDouble(),
+                            onChanged: (value) {
+                              ref
+                                  .read(settingsControllerProvider.notifier)
+                                  .updateDefaultSelectionCount(value.toInt());
+                            },
+                          ),
+                        ),
+                        SizedBox(
+                          width: 56,
+                          child: Text(
+                            '${settings.defaultSelectionCount}',
+                            textAlign: TextAlign.right,
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      '新建学习会话时默认请求的卡片数量。',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                   ],
                 ),
               ),
-              const Divider(height: 1),
-              ListTile(
-                title: const Text('默认选择卡片数量'),
-                subtitle: Text('${settings.defaultSelectionCount}'),
-                trailing: SizedBox(
-                  width: 180,
-                  child: Slider(
-                    min: 1,
-                    max: 100,
-                    divisions: 99,
-                    label: '${settings.defaultSelectionCount}',
-                    value: settings.defaultSelectionCount.toDouble(),
-                    onChanged: (value) {
-                      ref.read(settingsControllerProvider.notifier).updateDefaultSelectionCount(value.toInt());
-                    },
-                  ),
-                ),
-              ),
-              const Divider(height: 1),
-              const ListTile(title: Text('默认学习模式')),
-              RadioGroup<StudyMode>(
-                groupValue: settings.defaultStudyMode,
-                onChanged: (value) {
-                  if (value != null) {
-                    ref.read(settingsControllerProvider.notifier).updateDefaultStudyMode(value);
-                  }
-                },
-                child: const Column(
-                  children: [
-                    RadioListTile<StudyMode>(value: StudyMode.practice, title: Text('练习模式')),
-                    RadioListTile<StudyMode>(value: StudyMode.exam, title: Text('考试模式')),
+              const SizedBox(height: 16),
+              _SettingSection(
+                icon: Icons.school_outlined,
+                title: '默认学习模式',
+                child: SegmentedButton<StudyMode>(
+                  segments: const [
+                    ButtonSegment(
+                      value: StudyMode.practice,
+                      icon: Icon(Icons.visibility_outlined),
+                      label: Text('练习'),
+                    ),
+                    ButtonSegment(
+                      value: StudyMode.exam,
+                      icon: Icon(Icons.quiz_outlined),
+                      label: Text('考试'),
+                    ),
                   ],
+                  selected: {settings.defaultStudyMode},
+                  onSelectionChanged: (values) {
+                    ref
+                        .read(settingsControllerProvider.notifier)
+                        .updateDefaultStudyMode(values.first);
+                  },
                 ),
               ),
             ],
@@ -79,6 +130,43 @@ class SettingsPage extends ConsumerWidget {
         },
         error: (error, _) => Center(child: Text('加载失败：$error')),
         loading: () => const Center(child: CircularProgressIndicator()),
+      ),
+    );
+  }
+}
+
+class _SettingSection extends StatelessWidget {
+  const _SettingSection({
+    required this.icon,
+    required this.title,
+    required this.child,
+  });
+
+  final IconData icon;
+  final String title;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return EngPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              EngIconBadge(icon: icon),
+              const SizedBox(width: 12),
+              Text(
+                title,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          child,
+        ],
       ),
     );
   }
