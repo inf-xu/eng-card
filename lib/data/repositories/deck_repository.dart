@@ -17,19 +17,20 @@ class DeckRepository {
   final AppDatabase db;
 
   Stream<List<DeckWithCount>> watchDecks() {
+    final countExpr = db.cardItems.id.count();
     final query = db.select(db.decks).join([
       leftOuterJoin(
         db.cardItems,
         db.cardItems.deckId.equalsExp(db.decks.id),
       ),
     ])
+      ..addColumns([countExpr])
       ..groupBy([db.decks.id])
       ..orderBy([OrderingTerm.asc(db.decks.createdAt)]);
 
     return query.watch().map((rows) {
       return rows.map((row) {
         final deck = row.readTable(db.decks);
-        final countExpr = db.cardItems.id.count();
         final count = row.read(countExpr) ?? 0;
         return DeckWithCount(deck: deck, cardCount: count);
       }).toList();
