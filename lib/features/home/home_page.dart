@@ -389,13 +389,16 @@ class _StudyCard extends StatelessWidget {
                    alignment: Alignment.centerLeft,
                    child: Stack(
                      alignment: Alignment.centerLeft,
-                     children: <Widget>[
-                       ...previousChildren,
-                       if (currentChild != null) currentChild,
-                     ],
-                   ),
-                 );
-               },
+                      children: <Widget>[
+                        ...previousChildren,
+                        ...switch (currentChild) {
+                          final Widget child => <Widget>[child],
+                          null => const <Widget>[],
+                        },
+                      ],
+                    ),
+                  );
+                },
                child: Text(
                  answerText,
                  key: ValueKey(answerText),

@@ -3,6 +3,17 @@ import 'dart:math';
 import 'package:drift/drift.dart';
 import 'package:eng_card/data/local/app_database.dart';
 
+class ActiveSessionCardLockedException implements Exception {
+  const ActiveSessionCardLockedException(this.cardId);
+
+  final int cardId;
+
+  @override
+  String toString() {
+    return 'ActiveSessionCardLockedException: card $cardId is locked in active session';
+  }
+}
+
 class CardRepository {
   CardRepository(this.db);
 
@@ -55,8 +66,9 @@ class CardRepository {
     required int id,
     required String title,
     String? answer,
-  }) {
-    return (db.update(db.cardItems)..where((tbl) => tbl.id.equals(id))).write(
+  }) async {
+    await _ensureCardNotLockedByActiveSession(id);
+    await (db.update(db.cardItems)..where((tbl) => tbl.id.equals(id))).write(
       CardItemsCompanion(
         title: Value(title),
         answer: Value(answer),
@@ -65,8 +77,9 @@ class CardRepository {
     );
   }
 
-  Future<void> deleteCard(int id) {
-    return (db.delete(db.cardItems)..where((tbl) => tbl.id.equals(id))).go();
+  Future<void> deleteCard(int id) async {
+    await _ensureCardNotLockedByActiveSession(id);
+    await (db.delete(db.cardItems)..where((tbl) => tbl.id.equals(id))).go();
   }
 
   Future<void> incrementSelectionCounts(List<int> cardIds) async {
@@ -132,5 +145,22 @@ class CardRepository {
     final denominator = (card.selectionCount + 1) * (card.overCount + 1);
     final raw = numerator / denominator;
     return raw.clamp(0.2, 20).toDouble();
+  }
+
+  Future<void> _ensureCardNotLockedByActiveSession(int cardId) async {
+    final rows = await db.customSelect(
+      '''
+      SELECT sc.card_id
+      FROM study_session_cards sc
+      INNER JOIN study_sessions s ON s.id = sc.session_id
+      WHERE sc.card_id = ? AND s.completed_at IS NULL
+      LIMIT 1
+      ''',
+      variables: [Variable<int>(cardId)],
+      readsFrom: {db.studySessionCards, db.studySessions},
+    ).get();
+    if (rows.isNotEmpty) {
+      throw ActiveSessionCardLockedException(cardId);
+    }
   }
 }

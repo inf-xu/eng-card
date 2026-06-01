@@ -46,11 +46,16 @@ final appBootstrapProvider = FutureProvider<void>((ref) async {
     final deckId = await ref
         .read(bootstrapRepositoryProvider)
         .seedIpaDeckFromAsset();
-    final nextSettings = settings.copyWith(hasSeededIpaDeck: true);
-    settingsController.state = AsyncValue.data(nextSettings);
+    final nextSettings = settings.copyWith(
+      hasSeededIpaDeck: true,
+      currentDeckId: settings.currentDeckId ?? deckId,
+    );
     await ref.read(settingsRepositoryProvider).save(nextSettings);
     if (settings.currentDeckId == null && deckId != null) {
       await settingsController.updateCurrentDeckId(deckId);
+    } else {
+      ref.invalidate(settingsControllerProvider);
+      await ref.read(settingsControllerProvider.future);
     }
   }
 });

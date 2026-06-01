@@ -1,6 +1,7 @@
+import 'package:drift/drift.dart';
+import 'package:drift/native.dart';
 import 'package:eng_card/data/local/app_database.dart';
 import 'package:eng_card/data/repositories/card_repository.dart';
-import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -35,6 +36,7 @@ void main() {
       ];
 
       final selected = repo.weightedSampleWithoutReplacement(cards, 3);
+
       expect(selected.length, 2);
       expect(selected.map((item) => item.id).toSet(), {1, 2});
       repo.db.close();
@@ -60,9 +62,103 @@ void main() {
       );
 
       final selected = repo.weightedSampleWithoutReplacement(cards, 10);
+
       expect(selected.length, 10);
       expect(selected.map((item) => item.id).toSet().length, 10);
       repo.db.close();
+    });
+  });
+
+  group('CardRepository active session lock', () {
+    late AppDatabase db;
+    late CardRepository repo;
+
+    setUp(() {
+      db = AppDatabase.forTesting(NativeDatabase.memory());
+      repo = CardRepository(db);
+    });
+
+    tearDown(() async {
+      await db.close();
+    });
+
+    test('blocks update and delete for cards in active session', () async {
+      final now = DateTime.now();
+      final deckId = await db.into(db.decks).insert(
+            DecksCompanion.insert(
+              name: 'deck',
+              createdAt: Value(now),
+              updatedAt: Value(now),
+            ),
+          );
+      final cardId = await db.into(db.cardItems).insert(
+            CardItemsCompanion.insert(
+              deckId: deckId,
+              title: 'locked',
+              answer: const Value('ans'),
+              sortIndex: 0,
+              createdAt: Value(now),
+              updatedAt: Value(now),
+            ),
+          );
+      final sessionId = await db.into(db.studySessions).insert(
+            StudySessionsCompanion.insert(
+              deckId: deckId,
+              source: 0,
+              mode: 0,
+              currentIndex: const Value(0),
+              cycleCount: const Value(0),
+              startedAt: Value(now),
+            ),
+          );
+      await db.into(db.studySessionCards).insert(
+            StudySessionCardsCompanion.insert(
+              sessionId: sessionId,
+              cardId: cardId,
+              titleSnapshot: 'locked',
+              answerSnapshot: const Value('ans'),
+              displayOrder: 0,
+              isOver: const Value(false),
+            ),
+          );
+
+      await expectLater(
+        repo.updateCard(id: cardId, title: 'new', answer: 'new'),
+        throwsA(isA<ActiveSessionCardLockedException>()),
+      );
+      await expectLater(
+        repo.deleteCard(cardId),
+        throwsA(isA<ActiveSessionCardLockedException>()),
+      );
+    });
+
+    test('allows update and delete for cards outside active session', () async {
+      final now = DateTime.now();
+      final deckId = await db.into(db.decks).insert(
+            DecksCompanion.insert(
+              name: 'deck',
+              createdAt: Value(now),
+              updatedAt: Value(now),
+            ),
+          );
+      final cardId = await db.into(db.cardItems).insert(
+            CardItemsCompanion.insert(
+              deckId: deckId,
+              title: 'editable',
+              answer: const Value('ans'),
+              sortIndex: 0,
+              createdAt: Value(now),
+              updatedAt: Value(now),
+            ),
+          );
+
+      await repo.updateCard(id: cardId, title: 'edited', answer: 'x');
+      final updated = await (db.select(db.cardItems)..where((t) => t.id.equals(cardId))).getSingle();
+      expect(updated.title, 'edited');
+
+      await repo.deleteCard(cardId);
+      final row = await (db.select(db.cardItems)..where((t) => t.id.equals(cardId))).getSingleOrNull();
+      expect(row == null, isTrue);
     });
   });
 }

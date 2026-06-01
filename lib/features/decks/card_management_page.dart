@@ -1,5 +1,7 @@
 import 'package:eng_card/app/providers.dart';
+import 'package:eng_card/data/repositories/card_repository.dart';
 import 'package:eng_card/features/decks/card_edit_page.dart';
+import 'package:eng_card/features/study/study_controller.dart';
 import 'package:eng_card/widgets/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,13 +18,19 @@ class CardManagementPage extends ConsumerWidget {
         subtitle: 'Cards',
         child: EngEmptyState(
           icon: Icons.folder_copy_outlined,
-          title: '请先选择卡片组',
-          message: '卡片需要归属于一个卡片组。',
+          title: '未选择牌组',
+          message: '请先在首页选择一个牌组后再管理卡片。',
         ),
       );
     }
 
     final cardsAsync = ref.watch(cardsByDeckProvider(deckId));
+    final studyState = ref.watch(studyControllerProvider(deckId));
+    final lockedCardIds = studyState.valueOrNull?.sessionData?.cards
+            .map((card) => card.cardId)
+            .toSet() ??
+        const <int>{};
+
     return EngPage(
       title: '卡片管理',
       subtitle: 'Cards',
@@ -33,44 +41,59 @@ class CardManagementPage extends ConsumerWidget {
           ).push(MaterialPageRoute(builder: (_) => const CardEditPage()));
         },
         icon: const Icon(Icons.add),
-        label: const Text('新增卡片'),
+        label: const Text('新建'),
       ),
       child: cardsAsync.when(
         data: (cards) {
           if (cards.isEmpty) {
             return const EngEmptyState(
               icon: Icons.style_outlined,
-              title: '当前卡片组暂无卡片',
-              message: '这个主题还没有写入任何记忆内容。',
+              title: '暂无卡片',
+              message: '点击右下角按钮创建第一张卡片。',
             );
           }
           return ListView.separated(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
             itemBuilder: (context, index) {
               final card = cards[index];
+              final isLocked = lockedCardIds.contains(card.id);
               return EngPanel(
                 child: ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const EngIconBadge(icon: Icons.style_outlined),
                   title: Text(card.title),
-                  subtitle: Text(
-                    card.answer?.isEmpty ?? true ? '（无答案）' : card.answer!,
-                  ),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => CardEditPage(editingCard: card),
-                      ),
-                    );
-                  },
+                  subtitle: Text(isLocked ? '本次记忆会话中，暂不可修改/删除' : (card.answer ?? '')),
+                  onTap: isLocked
+                      ? () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('本次记忆会话选中的单词不可修改')),
+                          );
+                        }
+                      : () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => CardEditPage(editingCard: card),
+                            ),
+                          );
+                        },
                   trailing: IconButton(
-                    tooltip: '删除卡片',
                     icon: const Icon(Icons.delete_outline),
-                    onPressed: () async {
-                      await ref
-                          .read(cardRepositoryProvider)
-                          .deleteCard(card.id);
-                    },
+                    onPressed: isLocked
+                        ? null
+                        : () async {
+                            try {
+                              await ref
+                                  .read(cardRepositoryProvider)
+                                  .deleteCard(card.id);
+                            } on ActiveSessionCardLockedException {
+                              if (!context.mounted) {
+                                return;
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('本次记忆会话选中的单词不可删除')),
+                              );
+                            }
+                          },
                   ),
                 ),
               );
