@@ -43,16 +43,23 @@ final appBootstrapProvider = FutureProvider<void>((ref) async {
   final settingsController = ref.read(settingsControllerProvider.notifier);
   final settings = await ref.read(settingsControllerProvider.future);
   if (!settings.hasSeededIpaDeck) {
-    final deckId = await ref
-        .read(bootstrapRepositoryProvider)
-        .seedIpaDeckFromAsset();
+    const seedAssetPaths = <String>[
+      'data/char.json',
+      'data/consonant.json',
+      'data/vowel_phonetic.json',
+      'data/vowel.json',
+    ];
+    final deckIds = await ref.read(bootstrapRepositoryProvider).seedDecksFromAssets(
+          assetPaths: seedAssetPaths,
+        );
+    final preferredDeckId = deckIds.isEmpty ? null : deckIds.first;
     final nextSettings = settings.copyWith(
       hasSeededIpaDeck: true,
-      currentDeckId: settings.currentDeckId ?? deckId,
+      currentDeckId: settings.currentDeckId ?? preferredDeckId,
     );
     await ref.read(settingsRepositoryProvider).save(nextSettings);
-    if (settings.currentDeckId == null && deckId != null) {
-      await settingsController.updateCurrentDeckId(deckId);
+    if (settings.currentDeckId == null && preferredDeckId != null) {
+      await settingsController.updateCurrentDeckId(preferredDeckId);
     } else {
       ref.invalidate(settingsControllerProvider);
       await ref.read(settingsControllerProvider.future);

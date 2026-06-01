@@ -9,26 +9,36 @@ class BootstrapRepository {
 
   final AppDatabase db;
 
-  Future<int?> seedIpaDeckFromAsset({String assetPath = 'doc/ipa.json'}) async {
-    final payload = await _loadSeedPayload(assetPath);
-    if (payload.cards.isEmpty || payload.deckName.isEmpty) {
-      return null;
+  Future<List<int>> seedDecksFromAssets({
+    required List<String> assetPaths,
+  }) async {
+    final seededDeckIds = <int>[];
+    for (final assetPath in assetPaths) {
+      final deckName = _deckNameFromAssetPath(assetPath);
+      if (deckName.isEmpty) {
+        continue;
+      }
+      final payload = await _loadSeedPayload(assetPath: assetPath, deckName: deckName);
+      if (payload.cards.isEmpty) {
+        continue;
+      }
+      final deckId = await _seedDeck(payload);
+      seededDeckIds.add(deckId);
     }
+    return seededDeckIds;
+  }
 
+  Future<int> _seedDeck(_SeedPayload payload) async {
     return db.transaction(() async {
-      final deck =
-          await (db.select(db.decks)
-                ..where((tbl) => tbl.name.equals(payload.deckName))
-                ..orderBy([(tbl) => OrderingTerm.asc(tbl.createdAt)])
-                ..limit(1))
-              .getSingleOrNull();
+      final deck = await (db.select(db.decks)
+            ..where((tbl) => tbl.name.equals(payload.deckName))
+            ..orderBy([(tbl) => OrderingTerm.asc(tbl.createdAt)])
+            ..limit(1))
+          .getSingleOrNull();
 
       final now = DateTime.now();
-      final deckId =
-          deck?.id ??
-          await db
-              .into(db.decks)
-              .insert(
+      final deckId = deck?.id ??
+          await db.into(db.decks).insert(
                 DecksCompanion.insert(
                   name: payload.deckName,
                   createdAt: Value(now),
@@ -36,27 +46,22 @@ class BootstrapRepository {
                 ),
               );
 
-      final existingCards =
-          await (db.select(db.cardItems)
-                ..where((tbl) => tbl.deckId.equals(deckId))
-                ..orderBy([(tbl) => OrderingTerm.asc(tbl.sortIndex)]))
-              .get();
+      final existingCards = await (db.select(db.cardItems)
+            ..where((tbl) => tbl.deckId.equals(deckId))
+            ..orderBy([(tbl) => OrderingTerm.asc(tbl.sortIndex)]))
+          .get();
 
       final existingKeys = existingCards
           .map((card) => _cardKey(card.title, card.answer))
           .toSet();
-      var nextSort = existingCards.isEmpty
-          ? 0
-          : existingCards.last.sortIndex + 1;
+      var nextSort = existingCards.isEmpty ? 0 : existingCards.last.sortIndex + 1;
 
       for (final card in payload.cards) {
         final key = _cardKey(card.title, card.answer);
         if (existingKeys.contains(key)) {
           continue;
         }
-        await db
-            .into(db.cardItems)
-            .insert(
+        await db.into(db.cardItems).insert(
               CardItemsCompanion.insert(
                 deckId: deckId,
                 title: card.title,
@@ -74,20 +79,22 @@ class BootstrapRepository {
     });
   }
 
-  Future<_IpaSeedPayload> _loadSeedPayload(String assetPath) async {
+  Future<_SeedPayload> _loadSeedPayload({
+    required String assetPath,
+    required String deckName,
+  }) async {
     final raw = await rootBundle.loadString(assetPath);
     final decoded = jsonDecode(raw);
     if (decoded is! Map<String, dynamic>) {
-      return const _IpaSeedPayload(deckName: '', cards: []);
+      return _SeedPayload(deckName: deckName, cards: const []);
     }
 
-    final deckName = (decoded['deck'] as String? ?? '').trim();
     final cardsRaw = decoded['cards'];
     if (cardsRaw is! List) {
-      return _IpaSeedPayload(deckName: deckName, cards: const []);
+      return _SeedPayload(deckName: deckName, cards: const []);
     }
 
-    final cards = <_IpaSeedCard>[];
+    final cards = <_SeedCard>[];
     for (final item in cardsRaw) {
       if (item is! Map<String, dynamic>) {
         continue;
@@ -97,13 +104,21 @@ class BootstrapRepository {
         continue;
       }
       final answerRaw = (item['answer'] as String?)?.trim();
-      final answer = (answerRaw == null || answerRaw.isEmpty)
-          ? null
-          : answerRaw;
-      cards.add(_IpaSeedCard(title: title, answer: answer));
+      final answer = (answerRaw == null || answerRaw.isEmpty) ? null : answerRaw;
+      cards.add(_SeedCard(title: title, answer: answer));
     }
 
-    return _IpaSeedPayload(deckName: deckName, cards: cards);
+    return _SeedPayload(deckName: deckName, cards: cards);
+  }
+
+  String _deckNameFromAssetPath(String assetPath) {
+    final normalized = assetPath.replaceAll('\\', '/').trim();
+    final slash = normalized.lastIndexOf('/');
+    final fileName = slash >= 0 ? normalized.substring(slash + 1) : normalized;
+    if (!fileName.endsWith('.json') || fileName.length <= 5) {
+      return '';
+    }
+    return fileName.substring(0, fileName.length - 5);
   }
 
   String _cardKey(String title, String? answer) {
@@ -112,15 +127,15 @@ class BootstrapRepository {
   }
 }
 
-class _IpaSeedPayload {
-  const _IpaSeedPayload({required this.deckName, required this.cards});
+class _SeedPayload {
+  const _SeedPayload({required this.deckName, required this.cards});
 
   final String deckName;
-  final List<_IpaSeedCard> cards;
+  final List<_SeedCard> cards;
 }
 
-class _IpaSeedCard {
-  const _IpaSeedCard({required this.title, required this.answer});
+class _SeedCard {
+  const _SeedCard({required this.title, required this.answer});
 
   final String title;
   final String? answer;

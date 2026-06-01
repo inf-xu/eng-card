@@ -71,7 +71,10 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - doc/ipa.json
+    - data/char.json
+    - data/consonant.json
+    - data/vowel_phonetic.json
+    - data/vowel.json
 
   # To add assets to your application, add an assets section, like this:
   # assets:
