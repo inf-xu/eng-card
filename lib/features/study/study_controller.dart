@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:eng_card/app/providers.dart';
 import 'package:eng_card/core/enums.dart';
 import 'package:eng_card/data/repositories/card_repository.dart';
@@ -56,9 +58,13 @@ class StudyViewState {
   }
 }
 
-final studyControllerProvider = StateNotifierProvider.autoDispose<StudyController, AsyncValue<StudyViewState>>((ref) {
-  return StudyController(ref);
-});
+final studyControllerProvider =
+    StateNotifierProvider.autoDispose<
+      StudyController,
+      AsyncValue<StudyViewState>
+    >((ref) {
+      return StudyController(ref);
+    });
 
 class StudyController extends StateNotifier<AsyncValue<StudyViewState>> {
   StudyController(this.ref) : super(const AsyncValue.loading()) {
@@ -69,13 +75,16 @@ class StudyController extends StateNotifier<AsyncValue<StudyViewState>> {
 
   DeckRepository get _deckRepo => ref.read(deckRepositoryProvider);
   CardRepository get _cardRepo => ref.read(cardRepositoryProvider);
-  StudySessionRepository get _sessionRepo => ref.read(sessionRepositoryProvider);
+  StudySessionRepository get _sessionRepo =>
+      ref.read(sessionRepositoryProvider);
 
   Future<void> _load() async {
     final settings = ref.read(settingsControllerProvider).valueOrNull;
     final defaultMode = settings?.defaultStudyMode ?? StudyMode.practice;
     final active = await _sessionRepo.loadActiveSession();
-    final mode = active == null ? defaultMode : StudyMode.values[active.session.mode];
+    final mode = active == null
+        ? defaultMode
+        : StudyMode.values[active.session.mode];
     state = AsyncValue.data(
       StudyViewState(
         mode: mode,
@@ -93,7 +102,9 @@ class StudyController extends StateNotifier<AsyncValue<StudyViewState>> {
     if (current == null) {
       return;
     }
-    final nextMode = current.mode == StudyMode.practice ? StudyMode.exam : StudyMode.practice;
+    final nextMode = current.mode == StudyMode.practice
+        ? StudyMode.exam
+        : StudyMode.practice;
     state = AsyncValue.data(current.copyWith(mode: nextMode));
   }
 
@@ -161,13 +172,20 @@ class StudyController extends StateNotifier<AsyncValue<StudyViewState>> {
     }
 
     final normalized = page % activeCount;
-    await _sessionRepo.updateSessionIndex(current.sessionData!.session.id, normalized);
-    final shouldClearRevealed = current.isExamMode && current.revealedCardIds.isNotEmpty;
+    final shouldClearRevealed =
+        current.isExamMode && current.revealedCardIds.isNotEmpty;
     state = AsyncValue.data(
       current.copyWith(
         virtualPage: page,
-        revealedCardIds: shouldClearRevealed ? <int>{} : current.revealedCardIds,
+        revealedCardIds: shouldClearRevealed
+            ? <int>{}
+            : current.revealedCardIds,
       ),
+    );
+    unawaited(
+      _sessionRepo
+          .updateSessionIndex(current.sessionData!.session.id, normalized)
+          .catchError((_) {}),
     );
   }
 
@@ -183,7 +201,8 @@ class StudyController extends StateNotifier<AsyncValue<StudyViewState>> {
       return;
     }
 
-    final nextRevealed = Set<int>.from(current.revealedCardIds)..add(card.cardId);
+    final nextRevealed = Set<int>.from(current.revealedCardIds)
+      ..add(card.cardId);
     state = AsyncValue.data(current.copyWith(revealedCardIds: nextRevealed));
 
     await _sessionRepo.logReveal(
@@ -210,31 +229,97 @@ class StudyController extends StateNotifier<AsyncValue<StudyViewState>> {
   Future<void> overCurrentCard() async {
     final current = state.valueOrNull;
     final card = current?.currentCard;
+    if (current == null || card == null) {
+      return;
+    }
+    await overCard(sessionCardId: card.sessionCardId, cardId: card.cardId);
+  }
+
+  Future<void> overCard({
+    required int sessionCardId,
+    required int cardId,
+    int? nextVirtualPage,
+  }) async {
+    final current = state.valueOrNull;
     final session = current?.sessionData;
-    if (current == null || card == null || session == null) {
+    if (current == null || session == null) {
       return;
     }
 
-    await _sessionRepo.markCardOver(
-      sessionId: session.session.id,
-      sessionCardId: card.sessionCardId,
+    final optimisticCards = session.cards
+        .map(
+          (item) => item.sessionCardId == sessionCardId
+              ? SessionCardView(
+                  sessionCardId: item.sessionCardId,
+                  cardId: item.cardId,
+                  sourceDeckId: item.sourceDeckId,
+                  title: item.title,
+                  answer: item.answer,
+                  displayOrder: item.displayOrder,
+                  isOver: true,
+                )
+              : item,
+        )
+        .toList();
+    final optimisticSession = ActiveSessionData(
+      session: session.session,
+      sourceDeckIds: session.sourceDeckIds,
+      cards: optimisticCards,
     );
-    await _cardRepo.incrementOverCount(card.cardId);
+    final resolvedVirtualPage = nextVirtualPage ?? current.virtualPage;
+    final optimisticActiveCount = optimisticSession.activeCards.length;
+    final optimisticState = current.copyWith(
+      sessionData: optimisticSession,
+      virtualPage: resolvedVirtualPage,
+      revealedCardIds: Set<int>.from(current.revealedCardIds)..remove(cardId),
+    );
 
-    final activeCount = await _sessionRepo.countActiveCards(session.session.id);
-    if (activeCount <= 0) {
-      await _sessionRepo.completeSession(session.session.id);
-      await _load();
-      return;
-    }
-
-    final refreshed = await _sessionRepo.loadSession(session.session.id);
-    state = AsyncValue.data(
-      current.copyWith(
-        sessionData: refreshed,
-        revealedCardIds: Set<int>.from(current.revealedCardIds)..remove(card.cardId),
+    state = AsyncValue.data(optimisticState);
+    unawaited(
+      _persistOverCard(
+        previousState: current,
+        optimisticState: optimisticState,
+        sessionId: session.session.id,
+        sessionCardId: sessionCardId,
+        cardId: cardId,
+        activeCount: optimisticActiveCount,
+        virtualPage: resolvedVirtualPage,
       ),
     );
+  }
+
+  Future<void> _persistOverCard({
+    required StudyViewState previousState,
+    required StudyViewState optimisticState,
+    required int sessionId,
+    required int sessionCardId,
+    required int cardId,
+    required int activeCount,
+    required int virtualPage,
+  }) async {
+    try {
+      await _sessionRepo.markCardOver(
+        sessionId: sessionId,
+        sessionCardId: sessionCardId,
+      );
+      await _cardRepo.incrementOverCount(cardId);
+
+      if (activeCount <= 0) {
+        await _sessionRepo.completeSession(sessionId);
+        await _load();
+        return;
+      }
+
+      await _sessionRepo.updateSessionIndex(
+        sessionId,
+        virtualPage % activeCount,
+      );
+    } catch (_) {
+      final latest = state.valueOrNull;
+      if (latest == optimisticState) {
+        state = AsyncValue.data(previousState);
+      }
+    }
   }
 
   Future<void> clearSession() async {

@@ -1,5 +1,6 @@
 import 'package:eng_card/app/providers.dart';
 import 'package:eng_card/core/enums.dart';
+import 'package:eng_card/data/repositories/study_session_repository.dart';
 import 'package:eng_card/features/decks/card_edit_page.dart';
 import 'package:eng_card/features/decks/card_management_page.dart';
 import 'package:eng_card/features/decks/deck_management_page.dart';
@@ -18,6 +19,8 @@ class HomePage extends ConsumerStatefulWidget {
 
 class _HomePageState extends ConsumerState<HomePage> {
   final PageController _pageController = PageController(initialPage: 1000);
+  final Map<int, int> _cardIdByPage = <int, int>{};
+  bool _isCompletingOver = false;
 
   @override
   void dispose() {
@@ -142,6 +145,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   ),
                 );
               }
+              _cacheCurrentPageCard(data);
 
               return Column(
                 children: [
@@ -164,7 +168,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                             .onPageChanged(page);
                       },
                       itemBuilder: (context, index) {
-                        final card = cards[index % cards.length];
+                        final card = _cardForPage(index, cards);
                         final visible = data.isAnswerVisible(card.cardId);
                         return Padding(
                           padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
@@ -210,9 +214,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         Expanded(
                           child: FilledButton.icon(
                             onPressed: () async {
-                              await ref
-                                  .read(studyControllerProvider.notifier)
-                                  .overCurrentCard();
+                              await _completeCurrentCard(data);
                             },
                             icon: const Icon(Icons.check_rounded),
                             label: const Text('Over'),
@@ -258,6 +260,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       return;
     }
 
+    _cardIdByPage.clear();
     await ref
         .read(studyControllerProvider.notifier)
         .createSession(
@@ -266,6 +269,116 @@ class _HomePageState extends ConsumerState<HomePage> {
           manualCardIds: result.manualCardIds,
           deckIds: result.deckIds,
         );
+  }
+
+  void _cacheCurrentPageCard(StudyViewState data) {
+    if (!_pageController.hasClients) {
+      return;
+    }
+    final page = _pageController.page?.round() ?? _pageController.initialPage;
+    final card = data.currentCard;
+    if (card == null) {
+      return;
+    }
+    _cardIdByPage[page] = card.cardId;
+  }
+
+  SessionCardView _cardForPage(int page, List<SessionCardView> cards) {
+    final cachedCardId = _cardIdByPage[page];
+    if (cachedCardId != null) {
+      for (final card in cards) {
+        if (card.cardId == cachedCardId) {
+          return card;
+        }
+      }
+    }
+
+    final card = cards[page % cards.length];
+    _cardIdByPage[page] = card.cardId;
+    return card;
+  }
+
+  Future<void> _completeCurrentCard(StudyViewState data) async {
+    if (_isCompletingOver) {
+      return;
+    }
+
+    final currentCards =
+        data.sessionData?.activeCards ?? const <SessionCardView>[];
+    if (currentCards.isEmpty) {
+      return;
+    }
+
+    _isCompletingOver = true;
+    try {
+      final currentPage = _pageController.hasClients
+          ? (_pageController.page?.round() ?? _pageController.initialPage)
+          : data.virtualPage;
+      final nextPage = currentPage + 1;
+      final overCard = _cardForPage(currentPage, currentCards);
+      _cardIdByPage[currentPage] = overCard.cardId;
+
+      if (_pageController.hasClients && currentCards.length > 1) {
+        final visualNextCard = _cardForPage(nextPage, currentCards);
+        _cardIdByPage[nextPage] = visualNextCard.cardId;
+        await _pageController.nextPage(
+          duration: const Duration(milliseconds: 260),
+          curve: Curves.easeOutCubic,
+        );
+
+        final nextCards = currentCards
+            .where((card) => card.sessionCardId != overCard.sessionCardId)
+            .toList();
+        final normalizedPage = _pageForCardNear(
+          page: nextPage,
+          cardId: visualNextCard.cardId,
+          cards: nextCards,
+        );
+        if (normalizedPage != null) {
+          _cardIdByPage[normalizedPage] = visualNextCard.cardId;
+          await ref
+              .read(studyControllerProvider.notifier)
+              .overCard(
+                sessionCardId: overCard.sessionCardId,
+                cardId: overCard.cardId,
+                nextVirtualPage: normalizedPage,
+              );
+          if (_pageController.hasClients) {
+            _pageController.jumpToPage(normalizedPage);
+          }
+          return;
+        }
+      }
+
+      await ref
+          .read(studyControllerProvider.notifier)
+          .overCard(
+            sessionCardId: overCard.sessionCardId,
+            cardId: overCard.cardId,
+            nextVirtualPage: currentPage,
+          );
+    } finally {
+      _isCompletingOver = false;
+    }
+  }
+
+  int? _pageForCardNear({
+    required int page,
+    required int cardId,
+    required List<SessionCardView> cards,
+  }) {
+    if (cards.isEmpty) {
+      return null;
+    }
+
+    final targetIndex = cards.indexWhere((card) => card.cardId == cardId);
+    if (targetIndex < 0) {
+      return null;
+    }
+
+    final remainder = page % cards.length;
+    final delta = targetIndex - remainder;
+    return page + delta;
   }
 }
 
@@ -382,38 +495,13 @@ class _StudyCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 28),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 180),
-              transitionBuilder: (child, animation) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: Align(alignment: Alignment.centerLeft, child: child),
-                );
-              },
-              layoutBuilder: (currentChild, previousChildren) {
-                return Align(
-                  alignment: Alignment.centerLeft,
-                  child: Stack(
-                    alignment: Alignment.centerLeft,
-                    children: <Widget>[
-                      ...previousChildren,
-                      ...switch (currentChild) {
-                        final Widget child => <Widget>[child],
-                        null => const <Widget>[],
-                      },
-                    ],
-                  ),
-                );
-              },
-              child: Text(
-                answerText,
-                key: ValueKey(answerText),
-                style: textTheme.titleMedium?.copyWith(
-                  color: isRevealed
-                      ? scheme.onSurface
-                      : scheme.onSurface.withValues(alpha: 0.52),
-                  height: 1.45,
-                ),
+            Text(
+              answerText,
+              style: textTheme.titleMedium?.copyWith(
+                color: isRevealed
+                    ? scheme.onSurface
+                    : scheme.onSurface.withValues(alpha: 0.52),
+                height: 1.45,
               ),
             ),
             const Spacer(),
