@@ -37,6 +37,19 @@ class CardRepository {
         .get();
   }
 
+  Future<List<CardItem>> listCardsByDecks(List<int> deckIds) async {
+    if (deckIds.isEmpty) {
+      return [];
+    }
+    return (db.select(db.cardItems)
+          ..where((tbl) => tbl.deckId.isIn(deckIds))
+          ..orderBy([
+            (tbl) => OrderingTerm.asc(tbl.deckId),
+            (tbl) => OrderingTerm.asc(tbl.sortIndex),
+          ]))
+        .get();
+  }
+
   Future<int> createCard({
     required int deckId,
     required String title,

@@ -108,13 +108,17 @@ class StudyController extends StateNotifier<AsyncValue<StudyViewState>> {
     required SessionSource source,
     required int requestedCount,
     required List<int> manualCardIds,
+    List<int>? deckIds,
   }) async {
     final prev = state.valueOrNull;
     final mode = prev?.mode ?? StudyMode.practice;
     state = const AsyncValue.loading();
 
     try {
-      final cards = await _cardRepo.listCardsByDeck(deckId);
+      final sourceDeckIds = (deckIds == null || deckIds.isEmpty)
+          ? <int>[deckId]
+          : deckIds.toSet().toList();
+      final cards = await _cardRepo.listCardsByDecks(sourceDeckIds);
       if (cards.isEmpty) {
         state = AsyncValue.data(
           StudyViewState(

@@ -270,6 +270,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           source: result.source,
           requestedCount: result.count,
           manualCardIds: result.manualCardIds,
+          deckIds: result.deckIds,
         );
   }
 }

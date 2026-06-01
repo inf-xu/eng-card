@@ -161,4 +161,91 @@ void main() {
       expect(row == null, isTrue);
     });
   });
+
+  group('CardRepository deck filters', () {
+    late AppDatabase db;
+    late CardRepository repo;
+
+    setUp(() {
+      db = AppDatabase.forTesting(NativeDatabase.memory());
+      repo = CardRepository(db);
+    });
+
+    tearDown(() async {
+      await db.close();
+    });
+
+    test('lists cards from multiple decks in stable order', () async {
+      final now = DateTime.now();
+      final firstDeckId = await db.into(db.decks).insert(
+            DecksCompanion.insert(
+              name: 'first',
+              createdAt: Value(now),
+              updatedAt: Value(now),
+            ),
+          );
+      final secondDeckId = await db.into(db.decks).insert(
+            DecksCompanion.insert(
+              name: 'second',
+              createdAt: Value(now),
+              updatedAt: Value(now),
+            ),
+          );
+      final thirdDeckId = await db.into(db.decks).insert(
+            DecksCompanion.insert(
+              name: 'third',
+              createdAt: Value(now),
+              updatedAt: Value(now),
+            ),
+          );
+      await db.into(db.cardItems).insert(
+            CardItemsCompanion.insert(
+              deckId: secondDeckId,
+              title: 'second-2',
+              answer: const Value(null),
+              sortIndex: 1,
+              createdAt: Value(now),
+              updatedAt: Value(now),
+            ),
+          );
+      await db.into(db.cardItems).insert(
+            CardItemsCompanion.insert(
+              deckId: firstDeckId,
+              title: 'first-1',
+              answer: const Value(null),
+              sortIndex: 0,
+              createdAt: Value(now),
+              updatedAt: Value(now),
+            ),
+          );
+      await db.into(db.cardItems).insert(
+            CardItemsCompanion.insert(
+              deckId: secondDeckId,
+              title: 'second-1',
+              answer: const Value(null),
+              sortIndex: 0,
+              createdAt: Value(now),
+              updatedAt: Value(now),
+            ),
+          );
+      await db.into(db.cardItems).insert(
+            CardItemsCompanion.insert(
+              deckId: thirdDeckId,
+              title: 'third-1',
+              answer: const Value(null),
+              sortIndex: 0,
+              createdAt: Value(now),
+              updatedAt: Value(now),
+            ),
+          );
+
+      final cards = await repo.listCardsByDecks([secondDeckId, firstDeckId]);
+
+      expect(cards.map((card) => card.title), [
+        'first-1',
+        'second-1',
+        'second-2',
+      ]);
+    });
+  });
 }

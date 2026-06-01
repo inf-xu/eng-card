@@ -164,6 +164,33 @@ final cardsByDeckProvider = StreamProvider.family<List<CardItem>, int>((
   return ref.watch(cardRepositoryProvider).watchCardsByDeck(deckId);
 });
 
+class DeckIdsKey {
+  DeckIdsKey(Iterable<int> deckIds)
+      : deckIds = List.unmodifiable(deckIds.toSet().toList()..sort());
+
+  final List<int> deckIds;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is DeckIdsKey && other._key == _key;
+  }
+
+  @override
+  int get hashCode => _key.hashCode;
+
+  String get _key => deckIds.join(',');
+}
+
+final cardsByDeckIdsProvider = FutureProvider.family<List<CardItem>, DeckIdsKey>((
+  ref,
+  key,
+) {
+  return ref.watch(cardRepositoryProvider).listCardsByDecks(key.deckIds);
+});
+
 final currentDeckIdProvider = Provider<int?>((ref) {
   return ref.watch(settingsControllerProvider).valueOrNull?.currentDeckId;
 });
