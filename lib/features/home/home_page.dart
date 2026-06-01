@@ -177,6 +177,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           child: _StudyCard(
                             title: card.title,
                             answer: visible ? card.answer : null,
+                            isRevealed: visible,
                             answerPlaceholder: data.isExamMode
                                 ? '点击卡片显示答案'
                                 : '',
@@ -325,6 +326,7 @@ class _StudyCard extends StatelessWidget {
   const _StudyCard({
     required this.title,
     required this.answer,
+    required this.isRevealed,
     required this.answerPlaceholder,
     required this.cardId,
     required this.onTap,
@@ -332,6 +334,7 @@ class _StudyCard extends StatelessWidget {
 
   final String title;
   final String? answer;
+  final bool isRevealed;
   final String answerPlaceholder;
   final int cardId;
   final VoidCallback onTap;
@@ -340,7 +343,7 @@ class _StudyCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final answerText = answer?.isNotEmpty == true ? answer! : answerPlaceholder;
+    final answerText = isRevealed ? (answer ?? '') : answerPlaceholder;
     return InkWell(
       borderRadius: BorderRadius.circular(8),
       onTap: onTap,
@@ -404,9 +407,9 @@ class _StudyCard extends StatelessWidget {
                  answerText,
                  key: ValueKey(answerText),
                 style: textTheme.titleMedium?.copyWith(
-                  color: answer == null
-                      ? scheme.onSurface.withValues(alpha: 0.52)
-                      : scheme.onSurface,
+                  color: isRevealed
+                      ? scheme.onSurface
+                      : scheme.onSurface.withValues(alpha: 0.52),
                   height: 1.45,
                 ),
               ),
