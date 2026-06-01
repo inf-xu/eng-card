@@ -191,7 +191,15 @@ class StudyController extends StateNotifier<AsyncValue<StudyViewState>> {
 
     final normalized = page % activeCount;
     await _sessionRepo.updateSessionIndex(current.sessionData!.session.id, normalized);
-    state = AsyncValue.data(current.copyWith(virtualPage: page));
+    // Exam mode: once user swipes to another card, the previously revealed answer
+    // should be hidden again.
+    final shouldClearRevealed = current.isExamMode && current.revealedCardIds.isNotEmpty;
+    state = AsyncValue.data(
+      current.copyWith(
+        virtualPage: page,
+        revealedCardIds: shouldClearRevealed ? <int>{} : current.revealedCardIds,
+      ),
+    );
   }
 
   Future<void> revealAnswer() async {

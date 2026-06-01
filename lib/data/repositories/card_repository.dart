@@ -84,16 +84,20 @@ class CardRepository {
   }
 
   Future<void> incrementResetCount(int cardId) {
-    return db.customStatement(
+    // Use `customUpdate` (not `customStatement`) so Drift can notify watchers
+    // of `card_items` and keep stats/home in sync.
+    return db.customUpdate(
       'UPDATE card_items SET reset_count = reset_count + 1 WHERE id = ?',
-      [cardId],
+      variables: [Variable<int>(cardId)],
+      updates: {db.cardItems},
     );
   }
 
   Future<void> incrementOverCount(int cardId) {
-    return db.customStatement(
+    return db.customUpdate(
       'UPDATE card_items SET over_count = over_count + 1 WHERE id = ?',
-      [cardId],
+      variables: [Variable<int>(cardId)],
+      updates: {db.cardItems},
     );
   }
 
