@@ -21,9 +21,9 @@ class SessionPickerResult {
 }
 
 class SessionPickerSheet extends ConsumerStatefulWidget {
-  const SessionPickerSheet({super.key, required this.deckId});
+  const SessionPickerSheet({super.key, required this.initialDeckId});
 
-  final int deckId;
+  final int initialDeckId;
 
   @override
   ConsumerState<SessionPickerSheet> createState() => _SessionPickerSheetState();
@@ -46,7 +46,7 @@ class _SessionPickerSheetState extends ConsumerState<SessionPickerSheet> {
         30;
     _source = SessionSource.weightedRandom;
     _count = defaultCount;
-    _selectedDeckIds = <int>{widget.deckId};
+    _selectedDeckIds = <int>{widget.initialDeckId};
   }
 
   @override
@@ -60,10 +60,12 @@ class _SessionPickerSheetState extends ConsumerState<SessionPickerSheet> {
           child: decksAsync.when(
             data: (decks) {
               final effectiveDeckIds = _selectedDeckIds.isEmpty
-                  ? <int>{widget.deckId}
+                  ? <int>{widget.initialDeckId}
                   : _selectedDeckIds;
-              final deckIds = effectiveDeckIds.toList()..sort();
-              final cardsAsync = ref.watch(cardsByDeckIdsProvider(DeckIdsKey(deckIds)));
+              final deckIds = effectiveDeckIds.toList();
+              final cardsAsync = ref.watch(
+                cardsByDeckIdsProvider(DeckIdsKey(deckIds)),
+              );
 
               return cardsAsync.when(
                 data: (cards) => _buildContent(
@@ -112,7 +114,7 @@ class _SessionPickerSheetState extends ConsumerState<SessionPickerSheet> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _SectionTitle(text: '出题方式'),
+              const _SectionTitle(text: '出题方式'),
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
@@ -143,7 +145,7 @@ class _SessionPickerSheetState extends ConsumerState<SessionPickerSheet> {
                 ),
               ),
               const SizedBox(height: 16),
-              _SectionTitle(text: '卡片组'),
+              const _SectionTitle(text: '卡片组'),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -166,7 +168,8 @@ class _SessionPickerSheetState extends ConsumerState<SessionPickerSheet> {
                         _selectedDeckIds.remove(deck.id);
                         _selectedCardIds.removeWhere(
                           (cardId) => cards.any(
-                            (card) => card.id == cardId && card.deckId == deck.id,
+                            (card) =>
+                                card.id == cardId && card.deckId == deck.id,
                           ),
                         );
                       });
@@ -181,7 +184,9 @@ class _SessionPickerSheetState extends ConsumerState<SessionPickerSheet> {
                   Expanded(
                     child: Slider(
                       min: hasCards ? 1 : 0,
-                      max: hasCards ? (maxCount <= 1 ? 1 : maxCount.toDouble()) : 1,
+                      max: hasCards
+                          ? (maxCount <= 1 ? 1 : maxCount.toDouble())
+                          : 1,
                       divisions: hasCards && maxCount > 1 ? maxCount - 1 : null,
                       value: count.toDouble(),
                       label: '$count',
@@ -208,27 +213,8 @@ class _SessionPickerSheetState extends ConsumerState<SessionPickerSheet> {
           Expanded(
             child: EngPanel(
               padding: const EdgeInsets.symmetric(vertical: 8),
-              child: ListView.builder(
-                itemCount: cards.length,
-                itemBuilder: (context, index) {
-                  final card = cards[index];
-                  final checked = _selectedCardIds.contains(card.id);
-                  return CheckboxListTile(
-                    dense: true,
-                    value: checked,
-                    title: Text(card.title),
-                    subtitle: card.answer?.isNotEmpty == true ? Text(card.answer!) : null,
-                    onChanged: (value) {
-                      setState(() {
-                        if (value ?? false) {
-                          _selectedCardIds.add(card.id);
-                        } else {
-                          _selectedCardIds.remove(card.id);
-                        }
-                      });
-                    },
-                  );
-                },
+              child: ListView(
+                children: _buildManualCardTiles(decks: decks, cards: cards),
               ),
             ),
           )
@@ -260,6 +246,55 @@ class _SessionPickerSheetState extends ConsumerState<SessionPickerSheet> {
       ],
     );
   }
+
+  List<Widget> _buildManualCardTiles({
+    required List<DeckWithCount> decks,
+    required List<CardItem> cards,
+  }) {
+    final widgets = <Widget>[];
+    for (final deck in decks.where(
+      (item) => _selectedDeckIds.contains(item.deck.id),
+    )) {
+      final deckCards = cards
+          .where((card) => card.deckId == deck.deck.id)
+          .toList();
+      if (deckCards.isEmpty) {
+        continue;
+      }
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+          child: Text(
+            deck.deck.name,
+            style: const TextStyle(fontWeight: FontWeight.w800),
+          ),
+        ),
+      );
+      for (final card in deckCards) {
+        final checked = _selectedCardIds.contains(card.id);
+        widgets.add(
+          CheckboxListTile(
+            dense: true,
+            value: checked,
+            title: Text(card.title),
+            subtitle: card.answer?.isNotEmpty == true
+                ? Text(card.answer!)
+                : null,
+            onChanged: (value) {
+              setState(() {
+                if (value ?? false) {
+                  _selectedCardIds.add(card.id);
+                } else {
+                  _selectedCardIds.remove(card.id);
+                }
+              });
+            },
+          ),
+        );
+      }
+    }
+    return widgets;
+  }
 }
 
 class _SectionTitle extends StatelessWidget {
@@ -271,9 +306,9 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w800,
-          ),
+      style: Theme.of(
+        context,
+      ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
     );
   }
 }
@@ -296,9 +331,9 @@ class _SheetHeader extends StatelessWidget {
             children: [
               Text(
                 '选择本轮记忆',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
               ),
               Text(
                 '已选 $selectedDeckCount 个卡片组，共 $total 张卡片',

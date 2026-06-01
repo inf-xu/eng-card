@@ -150,7 +150,8 @@ class StatsRepository {
 
   Stream<List<DeckRankItem>> watchDeckRanking({int limit = 5}) {
     return _watchTables([
-      TableUpdateQuery.onTable(db.studyEvents),
+      TableUpdateQuery.onTable(db.studySessions),
+      TableUpdateQuery.onTable(db.studySessionCards),
       TableUpdateQuery.onTable(db.decks),
     ], () => loadDeckRanking(limit: limit));
   }
@@ -158,10 +159,11 @@ class StatsRepository {
   Future<List<DeckRankItem>> loadDeckRanking({int limit = 5}) async {
     final sql = '''
       SELECT d.name AS deck_name, COUNT(e.id) AS completed_sessions
-      FROM study_events e
-      JOIN decks d ON d.id = e.deck_id
-      WHERE e.type = ?
-      GROUP BY e.deck_id
+      FROM study_session_cards e
+      JOIN study_sessions s ON s.id = e.session_id
+      JOIN decks d ON d.id = e.source_deck_id
+      WHERE s.completed_at IS NOT NULL
+      GROUP BY e.source_deck_id
       ORDER BY completed_sessions DESC
       LIMIT ?
     ''';
@@ -169,10 +171,8 @@ class StatsRepository {
     final rows = await db
         .customSelect(
           sql,
-          variables: [
-            Variable(StudyEventType.sessionCompleted.index),
-            Variable(limit),
-          ],
+          variables: [Variable(limit)],
+          readsFrom: {db.studySessionCards, db.studySessions, db.decks},
         )
         .get();
 

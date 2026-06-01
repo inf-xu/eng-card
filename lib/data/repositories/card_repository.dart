@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:drift/drift.dart';
 import 'package:eng_card/data/local/app_database.dart';
 
@@ -126,40 +124,6 @@ class CardRepository {
       updates: {db.cardItems},
     );
   }
-
-  List<CardItem> weightedSampleWithoutReplacement(List<CardItem> cards, int count) {
-    if (count >= cards.length) {
-      return List<CardItem>.from(cards);
-    }
-
-    final random = Random();
-    final pool = List<CardItem>.from(cards);
-    final selected = <CardItem>[];
-
-    while (selected.length < count && pool.isNotEmpty) {
-      final totalWeight = pool.fold<double>(0, (sum, card) => sum + _weight(card));
-      var threshold = random.nextDouble() * totalWeight;
-      var pickedIndex = 0;
-      for (var i = 0; i < pool.length; i++) {
-        threshold -= _weight(pool[i]);
-        if (threshold <= 0) {
-          pickedIndex = i;
-          break;
-        }
-      }
-      selected.add(pool.removeAt(pickedIndex));
-    }
-
-    return selected;
-  }
-
-  double _weight(CardItem card) {
-    final numerator = (card.resetCount + 1) * (card.resetCount + 1);
-    final denominator = (card.selectionCount + 1) * (card.overCount + 1);
-    final raw = numerator / denominator;
-    return raw.clamp(0.2, 20).toDouble();
-  }
-
   Future<void> _ensureCardNotLockedByActiveSession(int cardId) async {
     final rows = await db.customSelect(
       '''

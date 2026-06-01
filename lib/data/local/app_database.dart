@@ -44,19 +44,27 @@ class CardItems extends Table {
 class StudySessions extends Table {
   IntColumn get id => integer().autoIncrement()();
 
-  IntColumn get deckId => integer().references(Decks, #id, onDelete: KeyAction.cascade)();
-
   IntColumn get source => integer()();
 
   IntColumn get mode => integer()();
 
   IntColumn get currentIndex => integer().withDefault(const Constant(0))();
 
-  IntColumn get cycleCount => integer().withDefault(const Constant(0))();
-
   DateTimeColumn get startedAt => dateTime().withDefault(currentDateAndTime)();
 
   DateTimeColumn get completedAt => dateTime().nullable()();
+}
+
+class StudySessionDecks extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  IntColumn get sessionId => integer().references(StudySessions, #id, onDelete: KeyAction.cascade)();
+
+  IntColumn get deckId => integer().references(Decks, #id, onDelete: KeyAction.cascade)();
+
+  IntColumn get deckOrder => integer()();
+
+  IntColumn get requestedCountSnapshot => integer()();
 }
 
 class StudySessionCards extends Table {
@@ -65,6 +73,8 @@ class StudySessionCards extends Table {
   IntColumn get sessionId => integer().references(StudySessions, #id, onDelete: KeyAction.cascade)();
 
   IntColumn get cardId => integer()();
+
+  IntColumn get sourceDeckId => integer().references(Decks, #id, onDelete: KeyAction.cascade)();
 
   TextColumn get titleSnapshot => text()();
 
@@ -80,7 +90,9 @@ class StudyEvents extends Table {
 
   IntColumn get sessionId => integer().references(StudySessions, #id, onDelete: KeyAction.cascade)();
 
-  IntColumn get deckId => integer()();
+  IntColumn get sessionCardId => integer().nullable().references(StudySessionCards, #id, onDelete: KeyAction.setNull)();
+
+  IntColumn get sourceDeckId => integer().nullable().references(Decks, #id, onDelete: KeyAction.setNull)();
 
   IntColumn get cardId => integer().nullable()();
 
@@ -96,6 +108,7 @@ class StudyEvents extends Table {
     Decks,
     CardItems,
     StudySessions,
+    StudySessionDecks,
     StudySessionCards,
     StudyEvents,
   ],

@@ -41,15 +41,12 @@ class _CardEditPageState extends ConsumerState<CardEditPage> {
   Widget build(BuildContext context) {
     final currentDeckId = ref.watch(currentDeckIdProvider);
     final isEditing = widget.editingCard != null;
-    final deckIdForEdit = widget.editingCard?.deckId ?? currentDeckId;
-    final studyState = deckIdForEdit == null
-        ? null
-        : ref.watch(studyControllerProvider(deckIdForEdit)).valueOrNull;
-    final lockedCardIds = studyState?.sessionData?.cards
-            .map((card) => card.cardId)
-            .toSet() ??
+    final studyState = ref.watch(studyControllerProvider).valueOrNull;
+    final lockedCardIds =
+        studyState?.sessionData?.cards.map((card) => card.cardId).toSet() ??
         const <int>{};
-    final isLocked = isEditing && lockedCardIds.contains(widget.editingCard!.id);
+    final isLocked =
+        isEditing && lockedCardIds.contains(widget.editingCard!.id);
 
     return EngPage(
       title: isEditing ? '编辑卡片' : '新建卡片',
@@ -91,7 +88,7 @@ class _CardEditPageState extends ConsumerState<CardEditPage> {
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Text(
-                '本次记忆会话选中的单词不可修改，请先结束或重开会话。',
+                '本轮记忆选中的单词不可修改，请先结束或重开会话。',
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
             ),
@@ -106,19 +103,23 @@ class _CardEditPageState extends ConsumerState<CardEditPage> {
                     }
                     if (widget.editingCard == null) {
                       if (currentDeckId == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('未选择牌组')),
-                        );
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(const SnackBar(content: Text('未选择卡片组')));
                         return;
                       }
-                      await ref.read(cardRepositoryProvider).createCard(
+                      await ref
+                          .read(cardRepositoryProvider)
+                          .createCard(
                             deckId: currentDeckId,
                             title: title,
                             answer: answer.isEmpty ? null : answer,
                           );
                     } else {
                       try {
-                        await ref.read(cardRepositoryProvider).updateCard(
+                        await ref
+                            .read(cardRepositoryProvider)
+                            .updateCard(
                               id: widget.editingCard!.id,
                               title: title,
                               answer: answer.isEmpty ? null : answer,
@@ -128,7 +129,7 @@ class _CardEditPageState extends ConsumerState<CardEditPage> {
                           return;
                         }
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('本次记忆会话选中的单词不可修改')),
+                          const SnackBar(content: Text('本轮记忆选中的单词不可修改')),
                         );
                         return;
                       }

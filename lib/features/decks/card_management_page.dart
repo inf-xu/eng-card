@@ -18,15 +18,16 @@ class CardManagementPage extends ConsumerWidget {
         subtitle: 'Cards',
         child: EngEmptyState(
           icon: Icons.folder_copy_outlined,
-          title: '未选择牌组',
-          message: '请先在首页选择一个牌组后再管理卡片。',
+          title: '未选择卡片组',
+          message: '请先选择一个卡片组。',
         ),
       );
     }
 
     final cardsAsync = ref.watch(cardsByDeckProvider(deckId));
-    final studyState = ref.watch(studyControllerProvider(deckId));
-    final lockedCardIds = studyState.valueOrNull?.sessionData?.cards
+    final studyState = ref.watch(studyControllerProvider);
+    final lockedCardIds =
+        studyState.valueOrNull?.sessionData?.cards
             .map((card) => card.cardId)
             .toSet() ??
         const <int>{};
@@ -62,11 +63,13 @@ class CardManagementPage extends ConsumerWidget {
                   contentPadding: EdgeInsets.zero,
                   leading: const EngIconBadge(icon: Icons.style_outlined),
                   title: Text(card.title),
-                  subtitle: Text(isLocked ? '本次记忆会话中，暂不可修改/删除' : (card.answer ?? '')),
+                  subtitle: Text(
+                    isLocked ? '本轮记忆中，暂不可修改/删除' : (card.answer ?? ''),
+                  ),
                   onTap: isLocked
                       ? () {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('本次记忆会话选中的单词不可修改')),
+                            const SnackBar(content: Text('本轮记忆选中的单词不可修改')),
                           );
                         }
                       : () {
@@ -90,7 +93,7 @@ class CardManagementPage extends ConsumerWidget {
                                 return;
                               }
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('本次记忆会话选中的单词不可删除')),
+                                const SnackBar(content: Text('本轮记忆选中的单词不可删除')),
                               );
                             }
                           },

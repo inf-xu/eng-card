@@ -29,6 +29,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget build(BuildContext context) {
     final decksAsync = ref.watch(decksProvider);
     final currentDeckId = ref.watch(currentDeckIdProvider);
+    final studyState = ref.watch(studyControllerProvider);
 
     return decksAsync.when(
       data: (decks) {
@@ -39,11 +40,10 @@ class _HomePageState extends ConsumerState<HomePage> {
 
         if (!hasDeck || !validDeckId) {
           return EngPage(
-            title: '英格卡',
+            title: '记忆卡片',
             subtitle: 'Memory desk',
             actions: [
               IconButton(
-                tooltip: '新增卡片',
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const CardEditPage()),
@@ -54,8 +54,8 @@ class _HomePageState extends ConsumerState<HomePage> {
             ],
             child: EngEmptyState(
               icon: Icons.style_outlined,
-              title: '还没有可学习的卡片组',
-              message: '先创建一个主题，再把单词、短语或知识点放进去。',
+              title: '还没有可用卡片组',
+              message: '先创建卡片组，再添加需要记忆的卡片。',
               action: FilledButton.icon(
                 onPressed: () {
                   Navigator.of(context).push(
@@ -76,13 +76,11 @@ class _HomePageState extends ConsumerState<HomePage> {
             .firstWhere((deck) => deck.deck.id == deckId)
             .deck
             .name;
-        final studyState = ref.watch(studyControllerProvider(deckId));
 
         return EngPage(
           title: deckName,
-          subtitle: '英格卡',
+          subtitle: 'Memory desk',
           leading: IconButton(
-            tooltip: '卡片组管理',
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const DeckManagementPage()),
@@ -92,7 +90,6 @@ class _HomePageState extends ConsumerState<HomePage> {
           ),
           actions: [
             IconButton(
-              tooltip: '新增卡片',
               onPressed: () {
                 Navigator.of(
                   context,
@@ -101,7 +98,6 @@ class _HomePageState extends ConsumerState<HomePage> {
               icon: const Icon(Icons.add_card_outlined),
             ),
             IconButton(
-              tooltip: '卡片管理',
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const CardManagementPage()),
@@ -110,11 +106,8 @@ class _HomePageState extends ConsumerState<HomePage> {
               icon: const Icon(Icons.list_alt_outlined),
             ),
             IconButton(
-              tooltip: '切换模式',
               onPressed: () async {
-                await ref
-                    .read(studyControllerProvider(deckId).notifier)
-                    .toggleMode();
+                await ref.read(studyControllerProvider.notifier).toggleMode();
               },
               icon: const Icon(Icons.swap_horiz),
             ),
@@ -126,8 +119,8 @@ class _HomePageState extends ConsumerState<HomePage> {
               if (session == null || cards.isEmpty) {
                 return EngEmptyState(
                   icon: Icons.play_circle_outline,
-                  title: '准备开始一轮记忆',
-                  message: '当前模式为 ${data.mode.text}，选择本轮卡片后会固定成一次学习会话。',
+                  title: '开始本轮记忆',
+                  message: '可以从当前卡片组开始，也可以选择多个卡片组混合记忆。',
                   action: FilledButton.icon(
                     onPressed: () => _startSession(context, deckId),
                     icon: const Icon(Icons.play_arrow_rounded),
@@ -141,11 +134,11 @@ class _HomePageState extends ConsumerState<HomePage> {
                 return EngEmptyState(
                   icon: Icons.done_all_outlined,
                   title: '本轮已完成',
-                  message: '所有卡片都已标记为 Over，可以重新选择一组卡片继续。',
+                  message: '重新选择卡片后会创建新的全局记忆会话。',
                   action: FilledButton.icon(
                     onPressed: () => _startSession(context, deckId),
                     icon: const Icon(Icons.refresh),
-                    label: const Text('开始下一轮'),
+                    label: const Text('重选'),
                   ),
                 );
               }
@@ -158,6 +151,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       mode: data.mode.text,
                       remaining: cards.length,
                       total: session.cards.length,
+                      deckCount: session.sourceDeckIds.length,
                       onReselect: () => _startSession(context, deckId),
                     ),
                   ),
@@ -166,7 +160,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       controller: _pageController,
                       onPageChanged: (page) {
                         ref
-                            .read(studyControllerProvider(deckId).notifier)
+                            .read(studyControllerProvider.notifier)
                             .onPageChanged(page);
                       },
                       itemBuilder: (context, index) {
@@ -179,14 +173,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                             answer: visible ? card.answer : null,
                             isRevealed: visible,
                             answerPlaceholder: data.isExamMode
-                                ? '点击卡片显示答案'
+                                ? '点击卡片查看答案'
                                 : '',
                             cardId: card.cardId,
                             onTap: () {
                               ref
-                                  .read(
-                                    studyControllerProvider(deckId).notifier,
-                                  )
+                                  .read(studyControllerProvider.notifier)
                                   .revealAnswer();
                             },
                           ),
@@ -202,13 +194,11 @@ class _HomePageState extends ConsumerState<HomePage> {
                           child: OutlinedButton.icon(
                             onPressed: () async {
                               await ref
-                                  .read(
-                                    studyControllerProvider(deckId).notifier,
-                                  )
+                                  .read(studyControllerProvider.notifier)
                                   .resetCurrentCard();
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('已标记为继续学习')),
+                                  const SnackBar(content: Text('已记录 Reset')),
                                 );
                               }
                             },
@@ -221,9 +211,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           child: FilledButton.icon(
                             onPressed: () async {
                               await ref
-                                  .read(
-                                    studyControllerProvider(deckId).notifier,
-                                  )
+                                  .read(studyControllerProvider.notifier)
                                   .overCurrentCard();
                             },
                             icon: const Icon(Icons.check_rounded),
@@ -242,8 +230,13 @@ class _HomePageState extends ConsumerState<HomePage> {
         );
       },
       error: (error, _) => EngPage(
-        title: '英格卡',
-        child: Center(child: Text('加载失败：$error')),
+        title: '记忆卡片',
+        subtitle: 'Memory desk',
+        child: EngEmptyState(
+          icon: Icons.error_outline,
+          title: '加载失败',
+          message: '$error',
+        ),
       ),
       loading: () =>
           const Scaffold(body: Center(child: CircularProgressIndicator())),
@@ -258,7 +251,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       builder: (context) => FractionallySizedBox(
         heightFactor: 0.88,
-        child: SessionPickerSheet(deckId: deckId),
+        child: SessionPickerSheet(initialDeckId: deckId),
       ),
     );
     if (result == null) {
@@ -266,7 +259,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
 
     await ref
-        .read(studyControllerProvider(deckId).notifier)
+        .read(studyControllerProvider.notifier)
         .createSession(
           source: result.source,
           requestedCount: result.count,
@@ -281,12 +274,14 @@ class _StudyStatusBar extends StatelessWidget {
     required this.mode,
     required this.remaining,
     required this.total,
+    required this.deckCount,
     required this.onReselect,
   });
 
   final String mode;
   final int remaining;
   final int total;
+  final int deckCount;
   final VoidCallback onReselect;
 
   @override
@@ -307,6 +302,7 @@ class _StudyStatusBar extends StatelessWidget {
               runSpacing: 8,
               children: [
                 Chip(label: Text(mode)),
+                Chip(label: Text('$deckCount 组')),
                 Chip(label: Text('剩余 $remaining / $total')),
               ],
             ),
@@ -386,26 +382,32 @@ class _StudyCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 28),
-             AnimatedSwitcher(
-               duration: const Duration(milliseconds: 180),
-               layoutBuilder: (currentChild, previousChildren) {
-                 return Align(
-                   alignment: Alignment.centerLeft,
-                   child: Stack(
-                     alignment: Alignment.centerLeft,
-                      children: <Widget>[
-                        ...previousChildren,
-                        ...switch (currentChild) {
-                          final Widget child => <Widget>[child],
-                          null => const <Widget>[],
-                        },
-                      ],
-                    ),
-                  );
-                },
-               child: Text(
-                 answerText,
-                 key: ValueKey(answerText),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 180),
+              transitionBuilder: (child, animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: Align(alignment: Alignment.centerLeft, child: child),
+                );
+              },
+              layoutBuilder: (currentChild, previousChildren) {
+                return Align(
+                  alignment: Alignment.centerLeft,
+                  child: Stack(
+                    alignment: Alignment.centerLeft,
+                    children: <Widget>[
+                      ...previousChildren,
+                      ...switch (currentChild) {
+                        final Widget child => <Widget>[child],
+                        null => const <Widget>[],
+                      },
+                    ],
+                  ),
+                );
+              },
+              child: Text(
+                answerText,
+                key: ValueKey(answerText),
                 style: textTheme.titleMedium?.copyWith(
                   color: isRevealed
                       ? scheme.onSurface
