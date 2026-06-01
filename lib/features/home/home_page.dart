@@ -382,11 +382,23 @@ class _StudyCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 28),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 180),
-              child: Text(
-                answerText,
-                key: ValueKey(answerText),
+             AnimatedSwitcher(
+               duration: const Duration(milliseconds: 180),
+               layoutBuilder: (currentChild, previousChildren) {
+                 return Align(
+                   alignment: Alignment.centerLeft,
+                   child: Stack(
+                     alignment: Alignment.centerLeft,
+                     children: <Widget>[
+                       ...previousChildren,
+                       if (currentChild != null) currentChild,
+                     ],
+                   ),
+                 );
+               },
+               child: Text(
+                 answerText,
+                 key: ValueKey(answerText),
                 style: textTheme.titleMedium?.copyWith(
                   color: answer == null
                       ? scheme.onSurface.withValues(alpha: 0.52)
