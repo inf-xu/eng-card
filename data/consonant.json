@@ -1,0 +1,161 @@
+{
+    "deck": "辅音诀",
+    "cards": [
+        {
+            "title": "b /b/",
+            "answer": ""
+        },
+        {
+            "title": "d /d/",
+            "answer": ""
+        },
+        {
+            "title": "f /f/",
+            "answer": ""
+        },
+        {
+            "title": "g /g/",
+            "answer": ""
+        },
+        {
+            "title": "h /h/",
+            "answer": ""
+        },
+        {
+            "title": "j /dʒ/",
+            "answer": ""
+        },
+        {
+            "title": "k /k/",
+            "answer": ""
+        },
+        {
+            "title": "l /l/",
+            "answer": ""
+        },
+        {
+            "title": "m /m/",
+            "answer": ""
+        },
+        {
+            "title": "n /n/",
+            "answer": ""
+        },
+        {
+            "title": "ng /ŋ/",
+            "answer": ""
+        },
+        {
+            "title": "p /p/",
+            "answer": ""
+        },
+        {
+            "title": "r /r/",
+            "answer": ""
+        },
+        {
+            "title": "s /s/",
+            "answer": ""
+        },
+        {
+            "title": "sh /ʃ/",
+            "answer": ""
+        },
+        {
+            "title": "t /t/",
+            "answer": ""
+        },
+        {
+            "title": "ch /tʃ/",
+            "answer": ""
+        },
+        {
+            "title": "l /l/",
+            "answer": ""
+        },
+        {
+            "title": "th /θ/",
+            "answer": "吐气+s"
+        },
+        {
+            "title": "th /ð/",
+            "answer": "手机震动的声音"
+        },
+        {
+            "title": "v /v/",
+            "answer": ""
+        },
+        {
+            "title": "w /w/",
+            "answer": ""
+        },
+        {
+            "title": "y /j/",
+            "answer": ""
+        },
+        {
+            "title": "z /z/",
+            "answer": ""
+        },
+        {
+            "title": "s /ʒ/",
+            "answer": ""
+        },
+        {
+            "title": "tr /tr/",
+            "answer": ""
+        },
+        {
+            "title": "dr /dr/",
+            "answer": ""
+        },
+        {
+            "title": "ts /ts/",
+            "answer": ""
+        },
+        {
+            "title": "ds /dz/",
+            "answer": ""
+        },
+        {
+            "title": "qu /kw/",
+            "answer": ""
+        },
+        {
+            "title": "tw /tw/",
+            "answer": ""
+        },
+        {
+            "title": "l /l/ 舌音",
+            "answer": "欧"
+        },
+        {
+            "title": "n /n/ 舌音",
+            "answer": "恩"
+        },
+        {
+            "title": "r /r/ 舌音",
+            "answer": "儿"
+        },
+        {
+            "title": "sp /sp/",
+            "answer": "sb"
+        },
+        {
+            "title": "st /st/",
+            "answer": "sd"
+        },
+        {
+            "title": "sk /sk/",
+            "answer": "sg"
+        },
+        {
+            "title": "str /str/",
+            "answer": "sdr"
+        },
+        {
+            "title": "squ /squ/",
+            "answer": "sgu"
+        }
+    ]
+}

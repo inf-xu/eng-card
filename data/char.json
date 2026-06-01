@@ -1,0 +1,101 @@
+{
+    "deck": "元音字符",
+    "cards": [
+        {
+            "title": "a",
+            "answer": "/æ/ - /ɔː/ - /eɪ/ - /aː/ - /ə/ - /ɪ/ - /ɑː/ \n\n apple - talk - make - car - about - private - /ɑː/在国际音标中同/aː/"
+        },
+        {
+            "title": "o",
+            "answer": "/aː/ - /əʊ/ - /ʌ/ - /ɔː/ - /ə/ \n\n god - go - mother - short - lemon"
+        },
+        {
+            "title": "e",
+            "answer": "/iː/ - /e/ - /ə/ \n\n he - get - silent"
+        },
+        {
+            "title": "u",
+            "answer": "/uː/ - /ʊ/ - /ʌ/ - /ɪ/ \n\n blue - put - bus - busy 字母 u 发 /ɪ/ 音的情况非常罕见"
+        },
+        {
+            "title": "ee",
+            "answer": "/iː/"
+        },
+        {
+            "title": "i",
+            "answer": "/ɪ/ - /aɪ/"
+        },
+        {
+            "title": "oo",
+            "answer": "/uː/ - /ʊ/"
+        },
+        {
+            "title": "ir",
+            "answer": "/ɜːr/"
+        },
+        {
+            "title": "er",
+            "answer": "/ər/"
+        },
+        {
+            "title": "oy",
+            "answer": "/ɔɪ/"
+        },
+        {
+            "title": "eer",
+            "answer": "/ɪər/"
+        },
+        {
+            "title": "air",
+            "answer": "/eər/"
+        },
+        {
+            "title": "ou",
+            "answer": "/aʊ/"
+        },
+        {
+            "title": "ea",
+            "answer": "/iː/ - /e/"
+        },
+        {
+            "title": "y",
+            "answer": "/iː/ - /aɪ/"
+        },
+        {
+            "title": "ur",
+            "answer": "/ɜːr/"
+        },
+        {
+            "title": "or",
+            "answer": "/ər/"
+        },
+        {
+            "title": "oi",
+            "answer": "/ɔɪ/"
+        },
+        {
+            "title": "ear",
+            "answer": "/ɪər/"
+        },
+        {
+            "title": "are",
+            "answer": "/eər/"
+        },
+        {
+            "title": "ay",
+            "answer": "/eɪ/"
+        },
+        {
+            "title": "ai",
+            "answer": "/eɪ/"
+        },
+        {
+            "title": "ow",
+            "answer": "/əʊ/ - /aʊ/"
+        },
+        {
+            "title": "oa",
+            "answer": "/əʊ/"
+        }
+    ]
+}

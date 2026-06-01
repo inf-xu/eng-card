@@ -1,0 +1,89 @@
+{
+    "deck": "元音音标",
+    "cards": [
+        {
+            "title": "/iː/",
+            "answer": "衣 - 长 \n\n ee / ea / e / y"
+        },
+        {
+            "title": "/ɪ/",
+            "answer": "衣 - 短 \n\n i / a / u"
+        },
+        {
+            "title": "/uː/",
+            "answer": "屋 - 长 \n\n oo / u"
+        },
+        {
+            "title": "/ʊ/",
+            "answer": "屋 - 短 \n\n oo / u"
+        },
+        {
+            "title": "/aː/",
+            "answer": "啊 - 长 \n\n o / a"
+        },
+        {
+            "title": "/ʌ/",
+            "answer": "啊 - 短 \n\n u / o"
+        },
+        {
+            "title": "/ɜːr/",
+            "answer": "儿 - 长 \n\n ir / ur"
+        },
+        {
+            "title": "/ər/",
+            "answer": "儿 - 短 \n\n er / or"
+        },
+        {
+            "title": "/æ/",
+            "answer": "叫人 - 诶 - 大声 \n\n a"
+        },
+        {
+            "title": "/e/",
+            "answer": "叫人 - 诶 - 小声 \n\n e / ea"
+        },
+        {
+            "title": "/ɔː/",
+            "answer": "想到解法 - 喔 - 长 \n\n o / a"
+        },
+        {
+            "title": "/ɔɪ/",
+            "answer": "想到解法 - 喔衣 - 短 \n\n oy / oi"
+        },
+        {
+            "title": "/ɪər/",
+            "answer": "衣儿 \n\n eer / ear"
+        },
+        {
+            "title": "/eər/",
+            "answer": "诶儿 \n\n air / are"
+        },
+        {
+            "title": "/eɪ/",
+            "answer": "字母音 - A - 四声 \n\n a / ay / ai"
+        },
+        {
+            "title": "/aɪ/",
+            "answer": "字母音 - I - 四声 \n\n i / y"
+        },
+        {
+            "title": "/əʊ/",
+            "answer": "字母音 - O - 四声 - 欧 - 鹅屋 \n\n o / ow / oa"
+        },
+        {
+            "title": "/ɑː/",
+            "answer": "字母音 - 啊 \n\n a"
+        },
+        {
+            "title": "/aʊ/",
+            "answer": "字母音 - 傲 - 啊屋 \n\n ou / ow"
+        },
+        {
+            "title": "a /ə/",
+            "answer": "字母音 - 鹅 \n\n a / o / e"
+        },
+        {
+            "title": "ee / ea / e / y",
+            "answer": "衣 - 长 - /iː/"
+        }
+    ]
+}

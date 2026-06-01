@@ -1,0 +1,165 @@
+{
+    "deck": "元音诀",
+    "cards": [
+        {
+            "title": "ee /iː/",
+            "answer": "衣 - 长"
+        },
+        {
+            "title": "i /ɪ/",
+            "answer": "衣 - 短"
+        },
+        {
+            "title": "oo /uː/",
+            "answer": "屋 - 长"
+        },
+        {
+            "title": "u /ʊ/",
+            "answer": "屋 - 短"
+        },
+        {
+            "title": "o /aː/",
+            "answer": "啊 - 长"
+        },
+        {
+            "title": "u /ʌ/",
+            "answer": "啊 - 短"
+        },
+        {
+            "title": "ir /ɜːr/",
+            "answer": "儿 - 长"
+        },
+        {
+            "title": "er /ər/",
+            "answer": "儿 - 短"
+        },
+        {
+            "title": "a /æ/",
+            "answer": "叫人 - 诶 - 大声"
+        },
+        {
+            "title": "e /e/",
+            "answer": "叫人 - 诶 - 小声"
+        },
+        {
+            "title": "a /ɔː/",
+            "answer": "想到解法 - 喔 - 长"
+        },
+        {
+            "title": "oy /ɔɪ/",
+            "answer": "想到解法 - 喔衣 - 短"
+        },
+        {
+            "title": "eer /ɪər/",
+            "answer": "衣儿"
+        },
+        {
+            "title": "air /eər/",
+            "answer": "诶儿"
+        },
+        {
+            "title": "a /eɪ/",
+            "answer": "字母音 - A - 四声"
+        },
+        {
+            "title": "i /aɪ/",
+            "answer": "字母音 - I - 四声"
+        },
+        {
+            "title": "o /əʊ/",
+            "answer": "字母音 - O - 四声 - 欧 - 鹅屋"
+        },
+        {
+            "title": "a /ɑː/",
+            "answer": "字母音 - 啊"
+        },
+        {
+            "title": "ou /aʊ/",
+            "answer": "字母音 - 傲 - 啊屋"
+        },
+        {
+            "title": "a /ə/",
+            "answer": "字母音 - 鹅"
+        },
+        {
+            "title": "ee / ea / e / y",
+            "answer": "衣 - 长 - /iː/"
+        },
+        {
+            "title": "i / a / u",
+            "answer": "衣 - 短 - /ɪ/"
+        },
+        {
+            "title": "oo / u",
+            "answer": "屋 - 长 - /uː/ \n 屋 - 短 - /ʊ/"
+        },
+        {
+            "title": "o / a",
+            "answer": "啊 - 长 - /aː/ \n 想到解法 - 喔 - 长 - /ɔː/"
+        },
+        {
+            "title": "u / o",
+            "answer": "啊 - 短 - /ʌ/"
+        },
+        {
+            "title": "ir / ur",
+            "answer": "儿 - 长 - /ɜːr/"
+        },
+        {
+            "title": "er / or",
+            "answer": "儿 - 短 - /ər/"
+        },
+        {
+            "title": "e / ea",
+            "answer": "叫人 - 诶 - 小声 - /e/"
+        },
+        {
+            "title": "oy / oi",
+            "answer": "想到解法 - 喔 - 短 - /ɔɪ/"
+        },
+        {
+            "title": "eer / ear",
+            "answer": "衣儿 - /ɪər/"
+        },
+        {
+            "title": "air / are",
+            "answer": "诶儿 - /eər/"
+        },
+        {
+            "title": "a / ay / ai",
+            "answer": "字母音 - A - 四声 - /eɪ/"
+        },
+        {
+            "title": "i / y",
+            "answer": "字母音 - I - 四声 - /aɪ/"
+        },
+        {
+            "title": "o / ow / oa",
+            "answer": "字母音 - O - 四声 - /əʊ/"
+        },
+        {
+            "title": "ou / ow",
+            "answer": "字母音 - 傲 - /aʊ/"
+        },
+        {
+            "title": "a / o / e",
+            "answer": "字母音 - 鹅 - /ə/"
+        },
+        {
+            "title": "a",
+            "answer": "/æ/ - /ɔː/ - /eɪ/ - /aː/ - /ə/ - /ɪ/ - /ɑː/ \n\n apple - talk - make - car - about - private - /ɑː/在国际音标中同/aː/"
+        },
+        {
+            "title": "o",
+            "answer": "/aː/ - /əʊ/ - /ʌ/ - /ɔː/ - /ə/ \n\n god - go - mother - short - lemon"
+        },
+        {
+            "title": "e",
+            "answer": "/iː/ - /e/ - /ə/ \n\n he - get - silent"
+        },
+        {
+            "title": "u",
+            "answer": "/uː/ - /ʊ/ - /ʌ/ \n\n blue - put - bus"
+        }
+    ]
+}
