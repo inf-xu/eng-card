@@ -7,12 +7,14 @@ class AppSettings {
     required this.defaultSelectionCount,
     required this.defaultStudyMode,
     required this.currentDeckId,
+    required this.hasSeededIpaDeck,
   });
 
   final int themeModeIndex;
   final int defaultSelectionCount;
   final StudyMode defaultStudyMode;
   final int? currentDeckId;
+  final bool hasSeededIpaDeck;
 
   AppSettings copyWith({
     int? themeModeIndex,
@@ -20,12 +22,14 @@ class AppSettings {
     StudyMode? defaultStudyMode,
     int? currentDeckId,
     bool clearCurrentDeckId = false,
+    bool? hasSeededIpaDeck,
   }) {
     return AppSettings(
       themeModeIndex: themeModeIndex ?? this.themeModeIndex,
       defaultSelectionCount: defaultSelectionCount ?? this.defaultSelectionCount,
       defaultStudyMode: defaultStudyMode ?? this.defaultStudyMode,
       currentDeckId: clearCurrentDeckId ? null : (currentDeckId ?? this.currentDeckId),
+      hasSeededIpaDeck: hasSeededIpaDeck ?? this.hasSeededIpaDeck,
     );
   }
 }
@@ -35,6 +39,7 @@ class SettingsRepository {
   static const _defaultSelectionCountKey = 'default_selection_count';
   static const _defaultStudyModeKey = 'default_study_mode';
   static const _currentDeckIdKey = 'current_deck_id';
+  static const _hasSeededIpaDeckKey = 'has_seeded_ipa_deck';
 
   Future<AppSettings> load() async {
     final prefs = await SharedPreferences.getInstance();
@@ -44,6 +49,7 @@ class SettingsRepository {
       defaultSelectionCount: prefs.getInt(_defaultSelectionCountKey) ?? 30,
       defaultStudyMode: StudyMode.values[modeIndex.clamp(0, StudyMode.values.length - 1)],
       currentDeckId: prefs.getInt(_currentDeckIdKey),
+      hasSeededIpaDeck: prefs.getBool(_hasSeededIpaDeckKey) ?? false,
     );
   }
 
@@ -57,5 +63,6 @@ class SettingsRepository {
     } else {
       await prefs.setInt(_currentDeckIdKey, settings.currentDeckId!);
     }
+    await prefs.setBool(_hasSeededIpaDeckKey, settings.hasSeededIpaDeck);
   }
 }

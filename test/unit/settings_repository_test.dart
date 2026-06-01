@@ -14,6 +14,7 @@ void main() {
       expect(settings.defaultStudyMode, StudyMode.practice);
       expect(settings.themeModeIndex, 0);
       expect(settings.currentDeckId, isNull);
+      expect(settings.hasSeededIpaDeck, false);
     });
 
     test('save and reload values', () async {
@@ -24,6 +25,7 @@ void main() {
         defaultSelectionCount: 50,
         defaultStudyMode: StudyMode.exam,
         currentDeckId: 99,
+        hasSeededIpaDeck: true,
       );
 
       await repo.save(target);
@@ -33,6 +35,7 @@ void main() {
       expect(loaded.defaultSelectionCount, 50);
       expect(loaded.defaultStudyMode, StudyMode.exam);
       expect(loaded.currentDeckId, 99);
+      expect(loaded.hasSeededIpaDeck, true);
     });
   });
 }
